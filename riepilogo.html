@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Riepilogo Esercizio</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .submit-btn-custom {
+      background-color: #000;
+      color: #fff;
+      font-weight: bold;
+      padding: 0.8rem 1.2rem;
+      border-radius: 12px;
+      border: none;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <header class="top-bar profile-header">
+    <button onclick="window.location.href='esercizio.html'" class="back-btn">←</button>
+    <span>Riepilogo</span>
+  </header>
+
+  <main class="profile-container">
+    <div class="summary-box">
+      <p><strong>Paziente:</strong> <span id="paziente-nome">-</span></p>
+      <p><strong>Esercizio:</strong> <span id="sequenza">(vuoto)</span></p>
+      <p><strong>Ripetizioni:</strong> <span id="ripetizioni">0</span></p>
+    </div>
+
+    <label for="giorno">Giorno:</label>
+    <input type="date" id="giorno" />
+
+    <label for="orario">Orario:</label>
+    <div style="margin-bottom: 1rem;">
+      <select id="orario" name="orario" required>
+        <option value="">-- Seleziona un orario --</option>
+        <option value="08:00">08:00</option>
+        <option value="08:30">08:30</option>
+        <option value="09:00">09:00</option>
+        <option value="09:30">09:30</option>
+        <option value="10:00">10:00</option>
+        <option value="10:30">10:30</option>
+        <option value="11:00">11:00</option>
+        <option value="11:30">11:30</option>
+        <option value="12:00">12:00</option>
+        <option value="12:30">12:30</option>
+        <option value="13:00">13:00</option>
+        <option value="13:30">13:30</option>
+        <option value="14:00">14:00</option>
+        <option value="14:30">14:30</option>
+        <option value="15:00">15:00</option>
+        <option value="15:30">15:30</option>
+        <option value="16:00">16:00</option>
+        <option value="16:30">16:30</option>
+        <option value="17:00">17:00</option>
+        <option value="17:30">17:30</option>
+        <option value="18:00">18:00</option>
+      </select>
+    </div>
+
+    <button class="submit-btn-custom" onclick="submitExercise()" style="margin-top: 1.5rem;">
+      Invia esercizio
+    </button>
+  </main>
+
+  <script>
+    // Recupera i dati dal sessionStorage
+    const nome = sessionStorage.getItem('paziente') || 'Paziente';
+    const sequenza = JSON.parse(sessionStorage.getItem('esercizioSequenza') || '[]');
+    const ripetizioni = sessionStorage.getItem('esercizioRipetizioni') || '1';
+
+    // Visualizza i dati nella pagina
+    document.getElementById('paziente-nome').textContent = nome;
+    document.getElementById('ripetizioni').textContent = ripetizioni;
+
+    // Mostra la sequenza colorata
+    if (sequenza.length > 0) {
+      const htmlSequenza = sequenza.map(step => {
+        const color = step.endsWith('L') ? 'red' : 'blue';
+        return `<span style="color:${color}; font-weight:bold;">${step}</span>`;
+      }).join(' ');
+      document.getElementById('sequenza').innerHTML = htmlSequenza;
+    } else {
+      document.getElementById('sequenza').innerText = '(nessun passo)';
+    }
+
+    function submitExercise() {
+      const giorno = document.getElementById('giorno').value;
+      const orario = document.getElementById('orario').value;
+
+      if (!giorno || !orario || sequenza.length === 0) {
+        alert('Compila tutti i campi e aggiungi almeno un passo all’esercizio.');
+        return;
+      }
+
+      const data = {
+        paziente: nome,
+        esercizio: sequenza,
+        ripetizioni: parseInt(ripetizioni),
+        giorno,
+        orario
+      };
+
+      fetch('save_exercise.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      })
+        .then(res => res.json())
+        .then(response => {
+          if (response.status === 'ok') {
+            alert('Esercizio salvato!');
+            sessionStorage.removeItem('esercizioSequenza');
+            sessionStorage.removeItem('esercizioRipetizioni');
+            window.location.href = 'home.html';
+          } else {
+            alert('Errore: ' + response.message);
+          }
+        })
+        .catch(err => {
+          console.error('Errore di rete:', err);
+          alert('Errore durante l\'invio dei dati.');
+        });
+    }
+  </script>
+</body>
+</html>

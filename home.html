@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Home - Alzheimer App</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .calendar-header {
+      padding: 0.5rem 0;
+      text-align: center;
+      background-color: #efe5f8;
+    }
+    .calendar-header h3 {
+      margin: 0;
+      font-size: 1.2rem;
+      color: #333;
+    }
+    .calendar-strip {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      width: 100%;
+      box-sizing: border-box;
+      background-color: #efe5f8;
+    }
+    .day {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .day .circle {
+      background: white;
+      border-radius: 50%;
+      width: 32px;
+      height: 32px;
+      line-height: 32px;
+      margin-top: 4px;
+      font-weight: bold;
+      text-align: center;
+    }
+    .day.today .circle {
+      background: #0a0a23;
+      color: white;
+    }
+    .search-box {
+      display: block;
+      width: calc(100% - 2rem);
+      margin: 1rem auto;
+      padding: 0.75rem 1rem;
+      border: 1px solid #ccc;
+      border-radius: 12px;
+      font-size: 1rem;
+      box-sizing: border-box;
+    }
+  </style>
+</head>
+<body>
+  <div class="calendar-header">
+    <h3>Giugno</h3>
+    <div class="calendar-strip">
+      <div class="day"><span>Dom</span><div class="circle">27</div></div>
+      <div class="day"><span>Lun</span><div class="circle">28</div></div>
+      <div class="day"><span>Mar</span><div class="circle">29</div></div>
+      <div class="day today"><span>Mer</span><div class="circle">30</div></div>
+      <div class="day"><span>Gio</span><div class="circle">31</div></div>
+      <div class="day"><span>Ven</span><div class="circle">1</div></div>
+      <div class="day"><span>Sab</span><div class="circle">2</div></div>
+    </div>
+  </div>
+
+  <main class="patient-section">
+    <div class="patient-header">
+      <h2>Pazienti</h2>
+      <button onclick="window.location.reload()" class="refresh-btn">🔄</button>
+    </div>
+
+    <input type="text" placeholder="Cerca paziente..." class="search-box" />
+
+    <div class="patient-list-modern">
+      <div class="patient-card-modern" onclick="selectPaziente('Carmelo Ugolini')">
+        <img src="assets/avatar_1.png" alt="Avatar Carmelo" class="avatar-placeholder" />
+        <div class="patient-info">
+          <strong>Carmelo Ugolini</strong><br><small>Pensionato, 80 anni</small>
+        </div>
+        <div class="patient-status green"></div>
+      </div>
+
+      <div class="patient-card-modern" onclick="selectPaziente('Gedeone Rossi')">
+        <img src="assets/avatar_2.png" alt="Avatar Gedeone" class="avatar-placeholder" />
+        <div class="patient-info">
+          <strong>Gedeone Rossi</strong><br><small>Disoccupato, 75 anni</small>
+        </div>
+        <div class="patient-status red"></div>
+      </div>
+
+      <div class="patient-card-modern" onclick="selectPaziente('Nunzia Valente')">
+        <img src="assets/avatar_3.png" alt="Avatar Nunzia" class="avatar-placeholder" />
+        <div class="patient-info">
+          <strong>Nunzia Valente</strong><br><small>Pensionata, 67 anni</small>
+        </div>
+        <div class="patient-status red"></div>
+      </div>
+
+      <div class="patient-card-modern" onclick="selectPaziente('Valentina Biserni')">
+        <img src="assets/avatar_4.png" alt="Avatar Valentina" class="avatar-placeholder" />
+        <div class="patient-info">
+          <strong>Valentina Biserni</strong><br><small>Dipendente, 63 anni</small>
+        </div>
+        <div class="patient-status red"></div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    function selectPaziente(nome) {
+      sessionStorage.setItem('paziente', nome);
+      window.location.href = 'profilo.html';
+    }
+
+    function aggiornaStatiPazienti() {
+      fetch('get_status.php')
+        .then(res => res.json())
+        .then(stati => {
+          document.querySelectorAll('.patient-card-modern').forEach(card => {
+            const nome = card.querySelector('strong').innerText.trim();
+            const stato = stati[nome];
+            const indicatore = card.querySelector('.patient-status');
+            if (stato === 'ok') {
+              indicatore.classList.remove('red');
+              indicatore.classList.add('green');
+            } else {
+              indicatore.classList.remove('green');
+              indicatore.classList.add('red');
+            }
+          });
+        })
+        .catch(error => console.error('Errore nel recupero degli stati:', error));
+    }
+
+    aggiornaStatiPazienti();
+  </script>
+</body>
+</html>

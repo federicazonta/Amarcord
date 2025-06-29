@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Crea Esercizio</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="top-bar profile-header">
+    <button onclick="window.location.href='profilo.html'" class="back-btn">←</button>
+    <span id="titolo-paziente">Crea esercizio</span>
+  </header>
+
+  <main class="profile-container">
+    <div class="hands">
+      <button class="left" onclick="selectHand('L')">✋ Sinistra</button>
+      <button class="right" onclick="selectHand('R')">🤚 Destra</button>
+    </div>
+
+    <div class="exercise-grid">
+      <button onclick="addStep(1)">1</button>
+      <button onclick="addStep(2)">2</button>
+      <button onclick="addStep(3)">3</button>
+      <button onclick="addStep(4)">4</button>
+      <button onclick="addStep(5)">5</button>
+      <button onclick="addStep(6)">6</button>
+      <button onclick="addStep(7)">7</button>
+      <button onclick="addStep(8)">8</button>
+      <button onclick="addStep(9)">9</button>
+    </div>
+
+    <p id="exercise-display">Esercizio: <span id="exercise-sequence">(nessun passo)</span></p>
+
+    <label for="reps">Ripetizioni:</label>
+    <input type="number" id="reps" min="1" value="1">
+
+   <div class="buttons">
+  <button class="btn-icon danger" onclick="clearExercise()">
+    Elimina
+  </button>
+  <button class="btn-icon success" onclick="saveExercise()">
+    Salva
+  </button>
+</div>
+  </main>
+
+  <script>
+    const nome = sessionStorage.getItem('paziente') || '';
+    if (nome) {
+      document.getElementById('titolo-paziente').textContent = nome + ' - Crea esercizio';
+    }
+
+    let selectedHand = '';
+    let sequence = [];
+
+    function selectHand(hand) {
+      selectedHand = hand;
+      document.querySelector('.left').style.opacity = hand === 'L' ? '1' : '0.5';
+      document.querySelector('.right').style.opacity = hand === 'R' ? '1' : '0.5';
+    }
+
+    function addStep(number) {
+      if (!selectedHand) {
+        alert('Seleziona prima una mano (sinistra o destra).');
+        return;
+      }
+      const step = number + selectedHand;
+      sequence.push(step);
+      updateSequenceDisplay();
+    }
+
+    function updateSequenceDisplay() {
+      if (sequence.length === 0) {
+        document.getElementById('exercise-sequence').innerHTML = '(nessun passo)';
+        return;
+      }
+      const display = sequence.map(s => {
+        const color = s.endsWith('L') ? 'red' : 'blue';
+        return `<span style="color:${color}; font-weight:bold;">${s}</span>`;
+      }).join(' ');
+      document.getElementById('exercise-sequence').innerHTML = display;
+    }
+
+    function clearExercise() {
+      sequence = [];
+      updateSequenceDisplay();
+    }
+
+    function saveExercise() {
+      const reps = parseInt(document.getElementById('reps').value) || 1;
+      sessionStorage.setItem('esercizioSequenza', JSON.stringify(sequence));
+      sessionStorage.setItem('esercizioRipetizioni', reps);
+      window.location.href = 'riepilogo.html';
+    }
+  </script>
+</body>
+</html>
